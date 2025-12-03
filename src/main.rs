@@ -5,8 +5,9 @@ use std::{
 
 mod day1;
 mod day2;
+mod day3;
 
-use day2 as today; // UPDATE ME EACH DAY!
+use day3 as today; // UPDATE ME EACH DAY!
 
 fn main() {
 	run_solver::<today::Part1>(today::FILENAME, 1);
@@ -45,9 +46,9 @@ fn run_solver<T: Solver>(filename: &str, part: i32) {
 	println!();
 }
 
-/// Read input file line into a String.
+/// Read input file into a String.
 pub fn read_input(filename: &str) -> String {
 	let cwd = std::env::current_dir().unwrap();
 	let path = cwd.join(filename);
-	std::fs::read_to_string(path).unwrap_or_default()
+	std::fs::read_to_string(&path).expect(&format!("failed to read input file {path:?}"))
 }
