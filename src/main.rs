@@ -7,9 +7,10 @@ mod day1;
 mod day2;
 mod day3;
 mod day4;
+mod day5;
 mod grid;
 
-use day4 as today; // UPDATE ME EACH DAY!
+use day5 as today; // UPDATE ME EACH DAY!
 
 fn main() {
 	run_solver::<today::Part1>(today::FILENAME, 1);
