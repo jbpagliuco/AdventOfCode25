@@ -71,17 +71,13 @@ pub struct Part2 {
 	operators: Vec<char>,
 }
 
-const OPERATOR_CABOOSE: char = 0 as char;
-
 impl Solver for Part2 {
 	type Output = u64;
 
 	fn parse(input: String) -> Self {
 		let mut lines: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
 
-		let mut operators = lines.pop().unwrap();
-		operators.push(OPERATOR_CABOOSE); // Add sentinel to flush solver
-
+		let operators = lines.pop().unwrap();
 		let operands = lines;
 
 		Self {
@@ -110,52 +106,44 @@ impl Solver for Part2 {
 				cur_operator: '?',
 			},
 			|acc, (col, &operator_char)| {
-				if operator_char == OPERATOR_CABOOSE {
-					Acc {
-						total: acc.total + acc.cur,
-						cur: 0,
-						cur_operator: OPERATOR_CABOOSE,
-					}
-				} else {
-					// Parse current operand
-					let operand: u64 = (0..rows).fold(0, |acc, row| {
-						let char = self.operands[row][col];
-						if let Some(digit) = char.to_digit(10) { acc * 10 + digit as u64 } else { acc }
-					});
+				// Parse current operand
+				let operand: u64 = (0..rows).fold(0, |acc, row| {
+					let char = self.operands[row][col];
+					if let Some(digit) = char.to_digit(10) { acc * 10 + digit as u64 } else { acc }
+				});
 
-					// Technically the column could actually result in 0, but it doesn't for our input so
-					//  we can assume this is the column with all spaces.
-					if operand == 0 {
-						acc
+				// Technically the column could actually result in 0, but it doesn't for our input so
+				//  we can assume this is the column with all spaces.
+				if operand == 0 {
+					acc
+				} else {
+					if operator_char == ' ' {
+						// Keep accumulating the current problem
+						match acc.cur_operator {
+							'+' => Acc {
+								total: acc.total,
+								cur: acc.cur + operand,
+								cur_operator: acc.cur_operator,
+							},
+							'*' => Acc {
+								total: acc.total,
+								cur: acc.cur * operand,
+								cur_operator: acc.cur_operator,
+							},
+							_ => acc,
+						}
 					} else {
-						if operator_char == ' ' {
-							// Keep accumulating the current problem
-							match acc.cur_operator {
-								'+' => Acc {
-									total: acc.total,
-									cur: acc.cur + operand,
-									cur_operator: acc.cur_operator,
-								},
-								'*' => Acc {
-									total: acc.total,
-									cur: acc.cur * operand,
-									cur_operator: acc.cur_operator,
-								},
-								_ => acc,
-							}
-						} else {
-							// Add the previous problem into our total, and reset for the next problem
-							Acc {
-								total: acc.total + acc.cur,
-								cur: operand,
-								cur_operator: operator_char,
-							}
+						// Add the previous problem into our total, and reset for the next problem
+						Acc {
+							total: acc.total + acc.cur,
+							cur: operand,
+							cur_operator: operator_char,
 						}
 					}
 				}
 			},
 		);
 
-		Some(result.total)
+		Some(result.total + result.cur)
 	}
 }
